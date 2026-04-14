@@ -1,0 +1,1721 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Amazónia — Flora & Fauna · Exposição Imersiva</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300;1,600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green-deep:   #0a1a0d;
+      --green-mid:    #122a16;
+      --green-rich:   #1a4422;
+      --green-leaf:   #2d6e3a;
+      --green-bright: #4a9e5c;
+      --green-light:  #7dc98a;
+      --gold:         #c8922a;
+      --gold-light:   #e8b84b;
+      --amber:        #d4701a;
+      --cream:        #f5f0e8;
+      --font-display:   'Playfair Display', serif;
+      --font-editorial: 'Cormorant Garamond', serif;
+      --font-body:      'DM Sans', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--green-deep);
+      color: var(--cream);
+      font-family: var(--font-body);
+      cursor: none;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 1000;
+      opacity: 0.35;
+      mix-blend-mode: overlay;
+    }
+
+    /* ─── CURSOR ─── */
+    .cursor {
+      position: fixed;
+      width: 8px; height: 8px;
+      background: var(--gold-light);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      mix-blend-mode: screen;
+      transition: background 0.2s;
+    }
+    .cursor-ring {
+      position: fixed;
+      width: 36px; height: 36px;
+      border: 1px solid rgba(200,146,42,0.5);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9998;
+      transform: translate(-50%, -50%);
+      transition: width 0.3s, height 0.3s, border-color 0.3s;
+    }
+
+    /* ─── HERO ─── */
+    .hero {
+      position: relative;
+      height: 100vh;
+      min-height: 640px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .hero-bg {
+      position: absolute;
+      inset: -10%;
+      background: url('assets/images/amazonia1.jpg') center/cover no-repeat;
+      transform: scale(1.15);
+      will-change: transform;
+      z-index: 1;
+    }
+    .hero-overlay {
+      position: absolute; inset: 0; z-index: 2;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% 70%, rgba(10,26,13,0.25) 0%, rgba(10,26,13,0.88) 100%),
+        linear-gradient(180deg, rgba(10,26,13,0.65) 0%, transparent 25%, transparent 65%, rgba(10,26,13,0.97) 100%);
+    }
+    .fog-layer {
+      position: absolute; inset: 0; z-index: 3;
+      background:
+        radial-gradient(ellipse 140% 50% at 50% 85%, rgba(180,210,180,0.07) 0%, transparent 65%),
+        radial-gradient(ellipse 80% 30% at 20% 60%, rgba(180,210,180,0.05) 0%, transparent 50%);
+      animation: fogDrift 14s ease-in-out infinite alternate;
+      pointer-events: none;
+    }
+    @keyframes fogDrift {
+      0%   { transform: translateX(-2%) scaleX(1);    opacity: 0.5; }
+      100% { transform: translateX(2%)  scaleX(1.04); opacity: 0.85; }
+    }
+    .light-rays {
+      position: absolute; inset: 0; z-index: 4;
+      pointer-events: none;
+    }
+    .ray {
+      position: absolute;
+      top: -20%;
+      width: 2px;
+      height: 140%;
+      background: linear-gradient(180deg, rgba(200,180,80,0.2) 0%, transparent 65%);
+      transform-origin: top center;
+      transform: rotate(var(--angle, 0deg));
+      animation: rayPulse 5s ease-in-out infinite;
+      animation-delay: var(--delay, 0s);
+    }
+    @keyframes rayPulse {
+      0%, 100% { opacity: 0.25; }
+      50%       { opacity: 0.85; }
+    }
+    .particles {
+      position: absolute; inset: 0; z-index: 5;
+      pointer-events: none;
+    }
+    @keyframes floatUp {
+      0%   { transform: translateY(0) translateX(0); opacity: 0; }
+      8%   { opacity: 1; }
+      92%  { opacity: 0.5; }
+      100% { transform: translateY(-95vh) translateX(20px); opacity: 0; }
+    }
+    @keyframes leafFall {
+      0%   { transform: translateY(-30px) rotate(0deg) translateX(0);   opacity: 0; }
+      5%   { opacity: 0.5; }
+      95%  { opacity: 0.3; }
+      100% { transform: translateY(100vh) rotate(360deg) translateX(40px); opacity: 0; }
+    }
+    .hero-content {
+      position: relative; z-index: 7;
+      text-align: center;
+      padding: 0 2rem;
+    }
+    .hero-eyebrow {
+      font-family: var(--font-body);
+      font-size: 11px;
+      font-weight: 300;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1.2rem;
+    }
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(4rem, 10vw, 9rem);
+      font-weight: 700;
+      font-style: italic;
+      color: var(--green-light);
+      line-height: 1;
+      margin-bottom: 0.4rem;
+      text-shadow: 0 4px 40px rgba(0,0,0,0.6);
+    }
+    .hero-subtitle-line {
+      font-family: var(--font-display);
+      font-size: clamp(1.1rem, 2.5vw, 1.8rem);
+      font-weight: 400;
+      color: var(--cream);
+      opacity: 0.82;
+      font-style: italic;
+      margin-bottom: 2.8rem;
+    }
+    .hero-meta {
+      font-family: var(--font-body);
+      font-size: 11px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--gold);
+      opacity: 0.7;
+      margin-bottom: 3rem;
+    }
+    .hero-cta {
+      display: inline-block;
+      padding: 0.9rem 2.6rem;
+      border: 1px solid var(--gold);
+      color: var(--gold-light);
+      font-family: var(--font-body);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      text-decoration: none;
+      background: rgba(10,26,13,0.4);
+      backdrop-filter: blur(8px);
+      transition: background 0.3s, color 0.3s, border-color 0.3s;
+    }
+    .hero-cta:hover {
+      background: var(--gold);
+      color: var(--green-deep);
+      border-color: var(--gold);
+    }
+    .hero-scroll {
+      position: absolute;
+      bottom: 2.5rem; left: 50%;
+      transform: translateX(-50%);
+      z-index: 9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .hero-scroll span {
+      font-family: var(--font-body);
+      font-size: 9px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--gold);
+      opacity: 0.6;
+    }
+    .scroll-line {
+      width: 1px; height: 50px;
+      background: linear-gradient(180deg, var(--gold) 0%, transparent 100%);
+      animation: scrollLine 2s ease-in-out infinite;
+    }
+    @keyframes scrollLine {
+      0%, 100% { opacity: 0.3; transform: scaleY(1); }
+      50% { opacity: 0.9; transform: scaleY(1.2); }
+    }
+
+    /* ─── COUNTDOWN STRIP ─── */
+    .countdown-strip {
+      position: relative;
+      background: var(--green-rich);
+      padding: 3.5rem 2rem;
+      overflow: hidden;
+    }
+    .countdown-strip::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: url('assets/images/amazonia2.jpg') center/cover no-repeat;
+      opacity: 0.08;
+    }
+    .countdown-inner {
+      position: relative; z-index: 1;
+      max-width: 900px; margin: 0 auto;
+      text-align: center;
+    }
+    .countdown-label {
+      font-family: var(--font-body);
+      font-size: 10px;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--gold);
+      opacity: 0.7;
+      margin-bottom: 1.5rem;
+    }
+    .countdown-grid {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .cd-unit {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      min-width: 80px;
+    }
+    .cd-number {
+      font-family: var(--font-display);
+      font-size: clamp(2.8rem, 6vw, 5rem);
+      font-weight: 700;
+      color: var(--gold-light);
+      line-height: 1;
+    }
+    .cd-text {
+      font-family: var(--font-body);
+      font-size: 10px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--cream);
+      opacity: 0.55;
+    }
+    .cd-divider {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      color: var(--gold);
+      opacity: 0.4;
+      align-self: flex-start;
+      padding-top: 0.6rem;
+    }
+    .countdown-target {
+      margin-top: 1.5rem;
+      font-family: var(--font-editorial);
+      font-size: 1rem;
+      font-style: italic;
+      color: var(--cream);
+      opacity: 0.5;
+    }
+    .countdown-done {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-style: italic;
+      color: var(--gold-light);
+    }
+
+    /* ─── PROGRESS BAR ─── */
+    .section-progress {
+      background: var(--green-mid);
+      padding: 3rem 2rem;
+      border-top: 1px solid rgba(200,146,42,0.12);
+    }
+    .progress-inner {
+      max-width: 860px; margin: 0 auto;
+    }
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 1.2rem;
+    }
+    .progress-label {
+      font-family: var(--font-body);
+      font-size: 10px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--gold);
+      opacity: 0.7;
+    }
+    .progress-pct {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--gold-light);
+    }
+    .progress-track {
+      width: 100%;
+      height: 4px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 2px;
+      position: relative;
+      margin-bottom: 1.2rem;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--green-bright), var(--gold-light));
+      border-radius: 2px;
+      width: 0%;
+      transition: width 2.2s cubic-bezier(.22,.68,0,1.2);
+      position: relative;
+    }
+    .progress-fill::after {
+      content: '';
+      position: absolute; right: -4px; top: 50%;
+      transform: translateY(-50%);
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--gold-light);
+      box-shadow: 0 0 14px rgba(232,184,75,0.9);
+    }
+    .progress-milestones {
+      display: flex;
+      justify-content: space-between;
+    }
+    .pm-item {
+      font-family: var(--font-body);
+      font-size: 9px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--cream);
+      opacity: 0.4;
+      text-align: center;
+    }
+    .pm-item.active { color: var(--gold-light); opacity: 0.85; }
+
+    /* ─── SECTION COMMON ─── */
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      margin-bottom: 3rem;
+    }
+    .section-tag {
+      font-family: var(--font-body);
+      font-size: 9px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--gold);
+      opacity: 0.65;
+      white-space: nowrap;
+    }
+    .section-line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, var(--gold), transparent);
+      opacity: 0.25;
+    }
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      font-weight: 700;
+      font-style: italic;
+      color: var(--cream);
+      line-height: 1.1;
+    }
+    .section-title span { color: var(--green-light); }
+
+    /* ─── OBJECTIVO ─── */
+    .section-objectivo {
+      position: relative;
+      padding: 6rem 2rem;
+      overflow: hidden;
+    }
+    .objectivo-bg {
+      position: absolute; inset: 0;
+      background: url('assets/images/amazonia2.jpg') center/cover no-repeat fixed;
+      filter: saturate(0.3) brightness(0.35);
+      transition: filter 1.6s ease;
+    }
+    .objectivo-bg.revealed { filter: saturate(0.7) brightness(0.28); }
+    .objectivo-bg-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(10,26,13,0.92) 0%, rgba(18,42,22,0.85) 100%);
+    }
+    .objectivo-inner {
+      position: relative; z-index: 1;
+      max-width: 1100px; margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+    }
+    .objectivo-text p {
+      font-family: var(--font-editorial);
+      font-size: 1.25rem;
+      font-style: italic;
+      color: var(--cream);
+      opacity: 0.82;
+      line-height: 1.8;
+      margin-bottom: 1.2rem;
+    }
+    .objectivo-text p strong {
+      color: var(--gold-light);
+      font-style: normal;
+    }
+    .arara-deco {
+      width: 180px;
+      height: 220px;
+      margin-top: 2rem;
+      background: url('assets/images/arara.jpg') center top/cover no-repeat;
+      clip-path: ellipse(50% 50% at 50% 50%);
+      opacity: 0.75;
+      box-shadow: 0 0 40px rgba(200,146,42,0.2);
+    }
+    .obj-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .obj-card {
+      background: rgba(26,68,34,0.45);
+      border: 1px solid rgba(200,146,42,0.18);
+      border-left: 3px solid var(--gold);
+      backdrop-filter: blur(6px);
+      padding: 1.4rem 1.6rem;
+      opacity: 0;
+      transform: translateX(40px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .obj-card.in-view { opacity: 1; transform: translateX(0); }
+    .obj-card h4 {
+      font-family: var(--font-body);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.5rem;
+    }
+    .obj-card p {
+      font-family: var(--font-editorial);
+      font-size: 1rem;
+      font-style: italic;
+      color: var(--cream);
+      opacity: 0.8;
+      line-height: 1.6;
+    }
+
+    /* ─── COLLAGE ─── */
+    .section-collage { line-height: 0; }
+    .collage-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.9fr 0.9fr;
+      grid-template-rows: 1fr 1fr;
+      height: 70vh;
+      min-height: 420px;
+      gap: 3px;
+    }
+    .collage-cell {
+      overflow: hidden;
+      position: relative;
+      cursor: none;
+    }
+    .collage-cell img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      filter: blur(14px) saturate(0.25) brightness(0.45);
+      transform: scale(1.08);
+      transition: filter 1.4s cubic-bezier(.25,.46,.45,.94),
+                  transform 1.4s cubic-bezier(.25,.46,.45,.94);
+    }
+    .collage-cell.revealed img {
+      filter: blur(0px) saturate(0.9) brightness(0.65);
+      transform: scale(1.02);
+    }
+    .collage-cell.revealed:hover img {
+      filter: blur(0px) saturate(1.15) brightness(0.75);
+      transform: scale(1.0);
+    }
+    .collage-cell.span-rows { grid-row: 1 / 3; }
+    .collage-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(10,26,13,0.7), rgba(18,42,22,0.4));
+      z-index: 1;
+      pointer-events: none;
+    }
+    .collage-caption {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      z-index: 2; padding: 1.5rem;
+    }
+    .collage-caption h3 {
+      font-family: var(--font-display);
+      font-size: clamp(1rem, 2.5vw, 1.6rem);
+      font-style: italic;
+      color: var(--cream);
+      line-height: 1.2;
+    }
+    .collage-caption p {
+      font-size: 10px; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--gold);
+      margin-top: 6px;
+      font-family: var(--font-body);
+    }
+
+    /* ─── TIMELINE ─── */
+    .section-timeline {
+      position: relative;
+      padding: 6rem 2rem;
+      background: var(--green-deep);
+      overflow: hidden;
+    }
+    .timeline-leaves {
+      position: absolute; inset: 0;
+      pointer-events: none; z-index: 0;
+    }
+    .timeline-inner {
+      position: relative; z-index: 1;
+      max-width: 860px; margin: 0 auto;
+    }
+    .timeline-spine {
+      position: absolute;
+      left: 18px;
+      top: 120px;
+      bottom: 40px;
+      width: 2px;
+      background: linear-gradient(180deg,
+        var(--gold) 0%,
+        var(--green-bright) 50%,
+        #7b4f9e 100%);
+      opacity: 0.35;
+    }
+    .week-item {
+      display: grid;
+      grid-template-columns: 38px 1fr;
+      gap: 0 1.5rem;
+      margin-bottom: 2.5rem;
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.65s cubic-bezier(.25,.46,.45,.94),
+                  transform 0.65s cubic-bezier(.25,.46,.45,.94);
+    }
+    .week-item.in-view { opacity: 1; transform: translateY(0); }
+    .week-dot-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 6px;
+    }
+    .week-dot {
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      border: 2px solid var(--gold);
+      background: var(--green-deep);
+      flex-shrink: 0;
+      position: relative;
+      z-index: 2;
+    }
+    .week-dot.done  { background: var(--green-bright); border-color: var(--green-bright); }
+    .week-dot.done::after {
+      content: '';
+      position: absolute; inset: 3px;
+      border-radius: 50%;
+      background: var(--green-light);
+    }
+    .week-dot.active { background: var(--gold-light); border-color: var(--gold-light);
+      box-shadow: 0 0 14px rgba(232,184,75,0.7); }
+    .week-dot.next   { border-color: rgba(200,146,42,0.4); }
+    .week-dot.expo   { background: #7b4f9e; border-color: #b07fd6;
+      box-shadow: 0 0 14px rgba(123,79,158,0.6); }
+    .week-card {
+      background: rgba(18,42,22,0.5);
+      border: 1px solid rgba(200,146,42,0.12);
+      padding: 1.6rem 1.8rem;
+    }
+    .week-card.done  { border-left: 3px solid var(--green-bright); }
+    .week-card.active { border-left: 3px solid var(--gold-light); }
+    .week-card.expo  { border-left: 3px solid #b07fd6;
+      background: rgba(26,12,40,0.55); }
+    .week-header {
+      display: flex;
+      align-items: baseline;
+      gap: 1rem;
+      margin-bottom: 0.8rem;
+      flex-wrap: wrap;
+    }
+    .week-num {
+      font-family: var(--font-body);
+      font-size: 9px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--gold);
+      opacity: 0.65;
+    }
+    .week-title {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-style: italic;
+      color: var(--cream);
+    }
+    .week-badge {
+      margin-left: auto;
+      font-family: var(--font-body);
+      font-size: 8px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 2px;
+    }
+    .week-badge.checkpoint { background: rgba(212,112,26,0.25); color: var(--amber); border: 1px solid var(--amber); }
+    .week-badge.expo-badge { background: rgba(123,79,158,0.25); color: #b07fd6; border: 1px solid #7b4f9e; }
+    .week-badge.done-badge { background: rgba(74,158,92,0.2); color: var(--green-light); border: 1px solid var(--green-bright); }
+    .wc-sessions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.8rem;
+      margin-bottom: 1rem;
+    }
+    .session {
+      background: rgba(10,26,13,0.4);
+      border: 1px solid rgba(200,146,42,0.08);
+      padding: 0.8rem 1rem;
+    }
+    .session-day {
+      font-family: var(--font-body);
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold);
+      opacity: 0.6;
+      margin-bottom: 0.4rem;
+    }
+    .session-date {
+      font-family: var(--font-body);
+      font-size: 11px;
+      color: var(--cream);
+      opacity: 0.7;
+      margin-bottom: 0.6rem;
+    }
+    .task-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+    .task-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      cursor: pointer;
+      padding: 3px 0;
+      user-select: none;
+    }
+    .task-check {
+      width: 14px; height: 14px;
+      border: 1px solid rgba(200,146,42,0.45);
+      border-radius: 2px;
+      flex-shrink: 0;
+      margin-top: 2px;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .task-item.done .task-check {
+      background: var(--green-bright);
+      border-color: var(--green-bright);
+    }
+    .task-item.done .task-check::after {
+      content: '✓';
+      font-size: 9px;
+      color: var(--green-deep);
+      font-weight: 700;
+      line-height: 1;
+    }
+    .task-text {
+      font-family: var(--font-editorial);
+      font-size: 0.9rem;
+      color: var(--cream);
+      opacity: 0.72;
+      line-height: 1.4;
+      transition: opacity 0.2s;
+    }
+    .task-item.done .task-text {
+      opacity: 0.38;
+      text-decoration: line-through;
+    }
+    .checkpoint-banner {
+      margin-top: 0.8rem;
+      padding: 0.6rem 1rem;
+      background: rgba(212,112,26,0.12);
+      border: 1px solid rgba(212,112,26,0.3);
+      border-left: 3px solid var(--amber);
+    }
+    .checkpoint-banner p {
+      font-family: var(--font-body);
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--amber);
+    }
+
+    /* ─── ENTREGA ─── */
+    .section-entrega {
+      position: relative;
+      padding: 6rem 2rem;
+      overflow: hidden;
+    }
+    .entrega-bg {
+      position: absolute; inset: 0;
+      background: url('assets/images/amazonia3.jpg') center/cover no-repeat;
+      opacity: 0.07;
+    }
+    .entrega-bg-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(180deg, var(--green-mid) 0%, rgba(10,26,13,0.97) 100%);
+    }
+    .entrega-inner {
+      position: relative; z-index: 1;
+      max-width: 1000px; margin: 0 auto;
+    }
+    .entrega-subtitle {
+      font-family: var(--font-editorial);
+      font-size: 1.2rem;
+      font-style: italic;
+      color: var(--cream);
+      opacity: 0.62;
+      margin-bottom: 3rem;
+      max-width: 600px;
+    }
+    .entrega-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-bottom: 3rem;
+    }
+    .entrega-card {
+      background: rgba(18,42,22,0.55);
+      border: 1px solid rgba(200,146,42,0.14);
+      border-left: 3px solid var(--gold);
+      padding: 1.6rem 1.6rem 1.8rem;
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.6s cubic-bezier(.25,.46,.45,.94),
+                  transform 0.6s cubic-bezier(.25,.46,.45,.94);
+    }
+    .entrega-card.in-view { opacity: 1; transform: translateY(0); }
+    .entrega-card-num {
+      font-family: var(--font-display);
+      font-size: 2.4rem;
+      font-weight: 700;
+      color: var(--gold-light);
+      line-height: 1;
+      margin-bottom: 0.6rem;
+    }
+    .entrega-card-title {
+      font-family: var(--font-body);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.7rem;
+    }
+    .entrega-card-desc {
+      font-family: var(--font-editorial);
+      font-size: 0.98rem;
+      font-style: italic;
+      color: var(--cream);
+      opacity: 0.72;
+      line-height: 1.65;
+    }
+    .entrega-cta-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.4rem;
+    }
+    .entrega-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1.1rem 2.8rem;
+      border: 1px solid var(--gold);
+      color: var(--gold-light);
+      font-family: var(--font-body);
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      text-decoration: none;
+      background: rgba(10,26,13,0.4);
+      backdrop-filter: blur(8px);
+      transition: background 0.3s, color 0.3s, border-color 0.3s;
+    }
+    .entrega-btn:hover {
+      background: var(--gold);
+      color: var(--green-deep);
+      border-color: var(--gold);
+    }
+    .entrega-btn svg {
+      transition: transform 0.3s;
+    }
+    .entrega-btn:hover svg { transform: translate(3px, -3px); }
+    .entrega-nota {
+      max-width: 540px;
+      padding: 1rem 1.4rem;
+      background: rgba(212,112,26,0.1);
+      border: 1px solid rgba(212,112,26,0.3);
+      border-left: 3px solid var(--amber);
+    }
+    .entrega-nota p {
+      font-family: var(--font-body);
+      font-size: 12px;
+      line-height: 1.6;
+      color: var(--amber);
+      opacity: 0.9;
+    }
+    @media (max-width: 640px) {
+      .entrega-grid { grid-template-columns: 1fr; }
+    }
+    @media (min-width: 641px) and (max-width: 900px) {
+      .entrega-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    /* ─── REGRAS ─── */
+    .section-rules {
+      position: relative;
+      padding: 6rem 2rem;
+      overflow: hidden;
+    }
+    .rules-bg {
+      position: absolute; inset: 0;
+      background: url('assets/images/amazonia3.jpg') center/cover no-repeat;
+      opacity: 0.06;
+    }
+    .rules-bg-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(180deg, var(--green-deep) 0%, rgba(10,26,13,0.95) 100%);
+    }
+    .rules-inner {
+      position: relative; z-index: 1;
+      max-width: 1000px; margin: 0 auto;
+    }
+    .rules-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem;
+    }
+    .rule-item {
+      padding: 2rem 2rem;
+      background: rgba(18,42,22,0.5);
+      border: 1px solid rgba(200,146,42,0.1);
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.65s cubic-bezier(.25,.46,.45,.94),
+                  transform 0.65s cubic-bezier(.25,.46,.45,.94);
+    }
+    .rule-item.in-view { opacity: 1; transform: translateY(0); }
+    .rule-item.proibido {
+      border-left: 3px solid #c0392b;
+      background: rgba(30,8,8,0.5);
+    }
+    .rule-item.obrigatorio {
+      border-left: 3px solid var(--green-bright);
+    }
+    .rule-icon {
+      font-size: 1.6rem;
+      margin-bottom: 0.8rem;
+    }
+    .rule-type {
+      font-family: var(--font-body);
+      font-size: 9px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      margin-bottom: 0.6rem;
+    }
+    .rule-item.proibido .rule-type { color: #e74c3c; }
+    .rule-item.obrigatorio .rule-type { color: var(--green-light); }
+    .rule-item h4 {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-style: italic;
+      color: var(--cream);
+      margin-bottom: 0.6rem;
+    }
+    .rule-item ul {
+      list-style: none;
+      display: flex; flex-direction: column; gap: 5px;
+    }
+    .rule-item ul li {
+      font-family: var(--font-editorial);
+      font-size: 0.92rem;
+      color: var(--cream);
+      opacity: 0.7;
+      padding-left: 1rem;
+      position: relative;
+    }
+    .rule-item ul li::before {
+      content: '—';
+      position: absolute; left: 0;
+      color: var(--gold);
+      opacity: 0.5;
+    }
+
+    /* ─── FOOTER ─── */
+    .site-footer {
+      position: relative;
+      padding: 6rem 2rem 4rem;
+      text-align: center;
+      overflow: hidden;
+    }
+    .footer-bg {
+      position: absolute; inset: 0;
+      background: url('assets/images/amazonia1.jpg') center/cover no-repeat;
+      filter: saturate(0.5) brightness(0.22);
+    }
+    .footer-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(180deg, var(--green-deep) 0%, rgba(10,26,13,0.88) 40%, rgba(10,26,13,0.97) 100%);
+    }
+    .footer-inner {
+      position: relative; z-index: 1;
+    }
+    .footer-title {
+      font-family: var(--font-display);
+      font-size: clamp(2.5rem, 6vw, 5.5rem);
+      font-style: italic;
+      color: var(--cream);
+      margin-bottom: 1.2rem;
+      opacity: 0.9;
+    }
+    .footer-line {
+      width: 80px; height: 1px;
+      background: var(--gold);
+      margin: 0 auto 2rem;
+      opacity: 0.5;
+    }
+    .footer-credits {
+      font-family: var(--font-body);
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      color: var(--cream);
+      opacity: 0.35;
+    }
+    .footer-credits a { color: var(--gold); opacity: 0.7; text-decoration: none; }
+
+    /* ─── REVEAL UTILITY ─── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.65s cubic-bezier(.25,.46,.45,.94),
+                  transform 0.65s cubic-bezier(.25,.46,.45,.94);
+    }
+    .reveal.in-view { opacity: 1; transform: translateY(0); }
+    .reveal:nth-child(2) { transition-delay: 0.08s; }
+    .reveal:nth-child(3) { transition-delay: 0.16s; }
+    .reveal:nth-child(4) { transition-delay: 0.24s; }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 640px) {
+      .hero-title { font-size: 3.2rem; }
+      .objectivo-inner { grid-template-columns: 1fr; gap: 2rem; }
+      .wc-sessions { grid-template-columns: 1fr; }
+      .rules-grid { grid-template-columns: 1fr; }
+      .collage-grid {
+        grid-template-columns: 1fr 1fr;
+        height: auto; min-height: 280px;
+      }
+      .collage-cell.span-rows { grid-row: auto; }
+      .section-header { flex-direction: column; align-items: flex-start; }
+      .cd-divider { display: none; }
+      .week-item { grid-template-columns: 30px 1fr; gap: 0 1rem; }
+      .arara-deco { width: 120px; height: 150px; }
+    }
+    @media (min-width: 641px) and (max-width: 900px) {
+      .hero-title { font-size: 5rem; }
+      .objectivo-inner { gap: 2.5rem; }
+      .collage-grid { grid-template-columns: 1fr 1fr; }
+      .collage-cell.span-rows { grid-row: 1 / 3; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Custom cursor -->
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+
+  <!-- ══════════════════════════════════
+       1. HERO
+  ══════════════════════════════════ -->
+  <section class="hero" id="hero">
+    <div class="hero-bg" id="heroBg"></div>
+    <div class="hero-overlay"></div>
+    <div class="fog-layer"></div>
+    <div class="light-rays">
+      <div class="ray" style="--angle:-12deg; left:18%; --delay:0s; width:2px"></div>
+      <div class="ray" style="--angle:-6deg;  left:30%; --delay:1.2s; width:1px"></div>
+      <div class="ray" style="--angle:2deg;   left:50%; --delay:0.6s; width:3px"></div>
+      <div class="ray" style="--angle:8deg;   left:65%; --delay:2s;   width:2px"></div>
+      <div class="ray" style="--angle:14deg;  left:78%; --delay:0.9s; width:1px"></div>
+    </div>
+    <div class="particles" id="particles"></div>
+    <div class="hero-content">
+      <p class="hero-eyebrow">Oficina de Artes · 12.º Ano · 2026</p>
+      <h1 class="hero-title">Amazónia</h1>
+      <p class="hero-subtitle-line">Flora &amp; Fauna</p>
+      <p class="hero-meta">Exposição Imersiva · Escola Secundária</p>
+      <a href="#timeline" class="hero-cta">Explorar o Projeto</a>
+    </div>
+    <div class="hero-scroll">
+      <span>scroll</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+       2. COUNTDOWN STRIP
+  ══════════════════════════════════ -->
+  <section class="countdown-strip">
+    <div class="countdown-inner">
+      <p class="countdown-label">Contagem para a Exposição · 20 de Maio 2026</p>
+      <div class="countdown-grid" id="countdownGrid">
+        <div class="cd-unit">
+          <div class="cd-number" id="cd-weeks">—</div>
+          <div class="cd-text">Semanas</div>
+        </div>
+        <div class="cd-divider">·</div>
+        <div class="cd-unit">
+          <div class="cd-number" id="cd-days">—</div>
+          <div class="cd-text">Dias</div>
+        </div>
+        <div class="cd-divider">·</div>
+        <div class="cd-unit">
+          <div class="cd-number" id="cd-hours">—</div>
+          <div class="cd-text">Horas</div>
+        </div>
+        <div class="cd-divider">·</div>
+        <div class="cd-unit">
+          <div class="cd-number" id="cd-mins">—</div>
+          <div class="cd-text">Minutos</div>
+        </div>
+      </div>
+      <p class="countdown-target" id="countdownTarget">Montagem colectiva · Rita &amp; Turma</p>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+       3. BARRA DE PROGRESSO
+  ══════════════════════════════════ -->
+  <section class="section-progress">
+    <div class="progress-inner">
+      <div class="progress-header">
+        <span class="progress-label">Progresso do Projeto</span>
+        <span class="progress-pct" id="pct-display">0%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="prog-fill"></div>
+      </div>
+      <div class="progress-milestones">
+        <span class="pm-item">Início<br>15 Abr</span>
+        <span class="pm-item" id="pm-tasks">Tarefas</span>
+        <span class="pm-item">Exposição<br>20 Mai</span>
+        <span class="pm-item">Fim<br>3 Jun</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+       4. OBJECTIVO
+  ══════════════════════════════════ -->
+  <section class="section-objectivo" id="objectivo">
+    <div class="objectivo-bg" id="objectivoBg"></div>
+    <div class="objectivo-bg-overlay"></div>
+    <div class="objectivo-inner">
+      <div>
+        <div class="section-header reveal">
+          <span class="section-tag">Sobre o Projeto</span>
+          <div class="section-line"></div>
+        </div>
+        <h2 class="section-title reveal">O <span>Objetivo</span></h2>
+        <div style="height:1.5rem"></div>
+        <div class="objectivo-text">
+          <p class="reveal">Criar uma <strong>obra plástica tridimensional</strong> inspirada na flora e fauna da Amazónia, explorando materiais, texturas e cores que evoquem a riqueza e a complexidade desta floresta única.</p>
+          <p class="reveal">Cada aluno escolhe <strong>uma planta e um animal</strong> como referências principais, desenvolvendo esboços, pesquisa visual e construção ao longo de seis semanas.</p>
+        </div>
+        <div class="arara-deco reveal"></div>
+      </div>
+      <div class="obj-cards">
+        <div class="obj-card">
+          <h4>Tema Central</h4>
+          <p>Amazónia — a maior floresta tropical do mundo, com mais de 40.000 espécies de plantas e 3.000 espécies de peixes.</p>
+        </div>
+        <div class="obj-card">
+          <h4>Materiais</h4>
+          <p>Materiais naturais, reciclados e sintéticos à escolha — papier-mâché, tinta acrílica, tecidos, elementos orgânicos secos.</p>
+        </div>
+        <div class="obj-card">
+          <h4>Exposição Final</h4>
+          <p>Montagem colectiva na sala de aula transformada num ambiente imersivo. Abertura a 20 de maio de 2026.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+       5. COLLAGE IMERSIVO
+  ══════════════════════════════════ -->
+  <section class="section-collage">
+    <div class="collage-grid">
+      <div class="collage-cell span-rows" id="c1">
+        <img src="assets/images/amazonia2.jpg" alt="Rio Amazónia com neblina">
+        <div class="collage-overlay"></div>
+        <div class="collage-caption">
+          <h3>A floresta mais rica do mundo</h3>
+          <p>Flora &amp; Fauna</p>
+        </div>
+      </div>
+      <div class="collage-cell" id="c2">
+        <img src="assets/images/tucano.jpg" alt="Tucano na floresta amazónica">
+        <div class="collage-overlay"></div>
+      </div>
+      <div class="collage-cell" id="c3">
+        <img src="assets/images/arara.jpg" alt="Arara em voo">
+        <div class="collage-overlay"></div>
+      </div>
+      <div class="collage-cell" id="c4">
+        <img src="assets/images/amazonia3.jpg" alt="Folhagem tropical">
+        <div class="collage-overlay"></div>
+      </div>
+      <div class="collage-cell" id="c5">
+        <img src="assets/images/amazonia1.jpg" alt="Floresta densa" style="object-position: top center">
+        <div class="collage-overlay"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+       6. TIMELINE
+  ══════════════════════════════════ -->
+  <section class="section-timeline" id="timeline">
+    <div class="timeline-leaves" id="timelineLeaves"></div>
+    <div class="timeline-inner">
+      <div class="section-header reveal">
+        <span class="section-tag">Calendarização</span>
+        <div class="section-line"></div>
+      </div>
+      <h2 class="section-title reveal">Plano de <span>Trabalho</span></h2>
+      <div style="height: 3rem"></div>
+      <div class="timeline-spine"></div>
+      <div id="timelineWeeks"></div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+       7. ENTREGA DO TRABALHO
+  ══════════════════════════════════ -->
+  <section class="section-entrega" id="entrega">
+    <div class="entrega-bg"></div>
+    <div class="entrega-bg-overlay"></div>
+    <div class="entrega-inner">
+      <div class="section-header reveal">
+        <span class="section-tag">Documentação</span>
+        <div class="section-line"></div>
+      </div>
+      <h2 class="section-title reveal">Entrega do <span>Trabalho</span></h2>
+      <div style="height: 1rem"></div>
+      <p class="entrega-subtitle reveal">Antes da montagem, cada aluno entrega um PDF de documentação do processo</p>
+      <div class="entrega-grid">
+        <div class="entrega-card">
+          <div class="entrega-card-num">01</div>
+          <div class="entrega-card-title">Capa</div>
+          <p class="entrega-card-desc">Nome do aluno, título do trabalho, disciplina, ano lectivo.</p>
+        </div>
+        <div class="entrega-card">
+          <div class="entrega-card-num">02</div>
+          <div class="entrega-card-title">Índice</div>
+          <p class="entrega-card-desc">Estrutura do documento com numeração de páginas.</p>
+        </div>
+        <div class="entrega-card">
+          <div class="entrega-card-num">03</div>
+          <div class="entrega-card-title">Planta Seleccionada</div>
+          <p class="entrega-card-desc">Nome científico e nome comum. Imagens reais da planta. Localização natural na Amazónia. Características: forma, cor, textura, habitat.</p>
+        </div>
+        <div class="entrega-card">
+          <div class="entrega-card-num">04</div>
+          <div class="entrega-card-title">Animal Seleccionado</div>
+          <p class="entrega-card-desc">Nome científico e nome comum. Imagens reais do animal. Habitat e comportamento. Características visuais relevantes para a maquete.</p>
+        </div>
+        <div class="entrega-card">
+          <div class="entrega-card-num">05</div>
+          <div class="entrega-card-title">Esboços</div>
+          <p class="entrega-card-desc">Fotografias ou digitalizações dos esboços do processo. Plantas e alçados da maquete. Notas de construção.</p>
+        </div>
+        <div class="entrega-card">
+          <div class="entrega-card-num">06</div>
+          <div class="entrega-card-title">Trabalho Final</div>
+          <p class="entrega-card-desc">Fotografias da maquete finalizada. Mínimo 3 ângulos diferentes. Fotografia de integração na exposição colectiva.</p>
+        </div>
+      </div>
+      <div class="entrega-cta-wrap">
+        <a href="https://classroom.google.com/c/ODMyMTAzMjExMzc3/a/ODU5NjU4OTc4OTkz/details"
+           target="_blank"
+           rel="noopener"
+           class="entrega-btn">
+          Entregar trabalho no Google Classroom
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M3 13L13 3M13 3H6M13 3V10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+        <div class="entrega-nota">
+          <p>O PDF deve ser entregue antes da semana de montagem. Sem entrega não há avaliação da fase de documentação.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+       8. REGRAS
+  ══════════════════════════════════ -->
+  <section class="section-rules" id="regras">
+    <div class="rules-bg"></div>
+    <div class="rules-bg-overlay"></div>
+    <div class="rules-inner">
+      <div class="section-header reveal">
+        <span class="section-tag">Normas da Exposição</span>
+        <div class="section-line"></div>
+      </div>
+      <h2 class="section-title reveal">Regras &amp; <span>Conduta</span></h2>
+      <div style="height: 2.5rem"></div>
+      <div class="rules-grid">
+        <div class="rule-item proibido">
+          <div class="rule-icon">✕</div>
+          <div class="rule-type">Proibido</div>
+          <h4>Durante a Montagem</h4>
+          <ul>
+            <li>Tocar nas obras dos colegas sem autorização</li>
+            <li>Usar materiais fora da lista aprovada</li>
+            <li>Deixar a área de trabalho sem limpar</li>
+            <li>Usar telemóvel durante a aula prática</li>
+          </ul>
+        </div>
+        <div class="rule-item proibido">
+          <div class="rule-icon">✕</div>
+          <div class="rule-type">Proibido</div>
+          <h4>Na Exposição</h4>
+          <ul>
+            <li>Mover peças do espaço designado</li>
+            <li>Fotografar com flash nas obras frágeis</li>
+            <li>Entrar no espaço de instalação sem acompanhamento</li>
+            <li>Alterar a iluminação da sala</li>
+          </ul>
+        </div>
+        <div class="rule-item obrigatorio">
+          <div class="rule-icon">✓</div>
+          <div class="rule-type">Obrigatório</div>
+          <h4>Durante o Processo</h4>
+          <ul>
+            <li>Trazer avental e material em cada aula</li>
+            <li>Registar em fotografia cada fase de trabalho</li>
+            <li>Cumprir as datas de entrega de esboços</li>
+            <li>Participar na montagem colectiva da Semana 6</li>
+          </ul>
+        </div>
+        <div class="rule-item obrigatorio">
+          <div class="rule-icon">✓</div>
+          <div class="rule-type">Obrigatório</div>
+          <h4>Na Exposição Final</h4>
+          <ul>
+            <li>Apresentar a obra com legenda identificativa</li>
+            <li>Estar presente na abertura (20 de maio)</li>
+            <li>Entregar relatório de processo até 3 de junho</li>
+            <li>Fazer a desmontagem no final do ano letivo</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+       8. FOOTER
+  ══════════════════════════════════ -->
+  <footer class="site-footer">
+    <div class="footer-bg"></div>
+    <div class="footer-overlay"></div>
+    <div class="footer-inner">
+      <h2 class="footer-title">Bem-vindo à Amazónia.</h2>
+      <div class="footer-line"></div>
+      <p class="footer-credits">
+        Oficina de Artes · 12.º Ano · 2025–2026<br>
+        Professora Rita · Escola Secundária<br>
+        <br>
+        Exposição: 20 de maio 2026 · Fim de projeto: 3 de junho 2026
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    // ─── DATAS ───────────────────────────────────────────
+    const PROJECT_START = new Date(2026, 3, 15);  // 15 abril 2026
+    const EXPO_DATE     = new Date(2026, 4, 20);  // 20 maio 2026
+    const PROJECT_END   = new Date(2026, 5, 3);   // 3 junho 2026
+
+    // ─── CURSOR ──────────────────────────────────────────
+    const cursor = document.getElementById('cursor');
+    const ring   = document.getElementById('cursorRing');
+    let mx = 0, my = 0, rx = 0, ry = 0;
+
+    document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+
+    (function animCursor() {
+      cursor.style.left = mx + 'px';
+      cursor.style.top  = my + 'px';
+      rx += (mx - rx) * 0.1;
+      ry += (my - ry) * 0.1;
+      ring.style.left = rx + 'px';
+      ring.style.top  = ry + 'px';
+      requestAnimationFrame(animCursor);
+    })();
+
+    function attachCursorHover(els) {
+      els.forEach(el => {
+        el.addEventListener('mouseenter', () => {
+          ring.style.width  = '54px';
+          ring.style.height = '54px';
+          ring.style.borderColor = 'rgba(200,146,42,0.85)';
+        });
+        el.addEventListener('mouseleave', () => {
+          ring.style.width  = '36px';
+          ring.style.height = '36px';
+          ring.style.borderColor = 'rgba(200,146,42,0.5)';
+        });
+      });
+    }
+
+    // ─── PARALLAX ────────────────────────────────────────
+    const heroBg = document.getElementById('heroBg');
+    window.addEventListener('scroll', () => {
+      heroBg.style.transform = `scale(1.15) translateY(${window.scrollY * 0.22}px)`;
+    }, { passive: true });
+
+    // ─── PARTÍCULAS ──────────────────────────────────────
+    function createParticles(container, count) {
+      for (let i = 0; i < count; i++) {
+        const p = document.createElement('div');
+        const sz = Math.random() * 3 + 1;
+        Object.assign(p.style, {
+          position:       'absolute',
+          width:          sz + 'px',
+          height:         sz + 'px',
+          borderRadius:   '50%',
+          background:     `rgba(200,180,60,${0.4 + Math.random() * 0.5})`,
+          left:           (Math.random() * 100) + '%',
+          bottom:         (Math.random() * 40) + '%',
+          animation:      `floatUp ${9 + Math.random() * 13}s linear infinite`,
+          animationDelay: (Math.random() * 10) + 's',
+          pointerEvents:  'none',
+        });
+        container.appendChild(p);
+      }
+    }
+    createParticles(document.getElementById('particles'), 22);
+
+    // ─── FOLHAS A CAIR ────────────────────────────────────
+    function createFallingLeaves(container, count) {
+      const leafPaths = [
+        'M10 0 Q18 6 14 16 Q8 22 0 16 Q4 6 10 0Z',
+        'M6 0 Q14 4 12 14 Q6 20 0 12 Q2 4 6 0Z',
+        'M8 0 Q16 8 10 18 Q2 18 0 8 Q4 2 8 0Z',
+      ];
+      for (let i = 0; i < count; i++) {
+        const svg  = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        const li   = Math.floor(Math.random() * leafPaths.length);
+        const gs   = `hsl(${120 + Math.random()*30}, ${50+Math.random()*20}%, ${18+Math.random()*18}%)`;
+        svg.setAttribute('viewBox', '0 0 20 22');
+        svg.style.cssText = `
+          position: absolute;
+          width: ${10 + Math.random()*14}px;
+          left: ${Math.random() * 100}%;
+          top: -30px;
+          opacity: ${0.3 + Math.random() * 0.4};
+          animation: leafFall ${10 + Math.random()*12}s linear infinite;
+          animation-delay: ${Math.random() * 12}s;
+          pointer-events: none;
+        `;
+        path.setAttribute('d', leafPaths[li]);
+        path.setAttribute('fill', gs);
+        svg.appendChild(path);
+        container.appendChild(svg);
+      }
+    }
+
+    // Folhas no hero
+    createFallingLeaves(document.getElementById('particles'), 12);
+
+    // ─── COUNTDOWN ───────────────────────────────────────
+    function updateCountdown() {
+      const now  = new Date();
+      const diff = EXPO_DATE - now;
+      if (diff <= 0) {
+        document.getElementById('countdownGrid').innerHTML =
+          '<div class="countdown-done">A exposição chegou! 🌿</div>';
+        document.getElementById('countdownTarget').textContent = '20 de maio 2026 · Dia da montagem';
+        return;
+      }
+      const totalH = diff / 3600000;
+      const weeks  = Math.floor(totalH / 168);
+      const days   = Math.floor((totalH % 168) / 24);
+      const hours  = Math.floor(totalH % 24);
+      const mins   = Math.floor((diff % 3600000) / 60000);
+      document.getElementById('cd-weeks').textContent = weeks;
+      document.getElementById('cd-days').textContent  = days;
+      document.getElementById('cd-hours').textContent = String(hours).padStart(2, '0');
+      document.getElementById('cd-mins').textContent  = String(mins).padStart(2, '0');
+    }
+    updateCountdown();
+    setInterval(updateCountdown, 30000);
+
+    // ─── PROGRESSO ───────────────────────────────────────
+    function updateProgress() {
+      const now     = new Date();
+      const total   = EXPO_DATE - PROJECT_START;
+      const elapsed = now - PROJECT_START;
+      const pct     = Math.max(0, Math.min(100, Math.round(elapsed / total * 100)));
+      setTimeout(() => {
+        document.getElementById('prog-fill').style.width = pct + '%';
+        document.getElementById('pct-display').textContent = pct + '%';
+      }, 800);
+      const pmTasks = document.getElementById('pm-tasks');
+      if (pmTasks) pmTasks.textContent = pct + '% feito';
+    }
+    updateProgress();
+
+    // ─── TIMELINE DATA ───────────────────────────────────
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    function weekStatus(terDate, quiDate) {
+      const ter = new Date(terDate); ter.setHours(0,0,0,0);
+      const qui = new Date(quiDate); qui.setHours(0,0,0,0);
+      if (today > qui) return 'done';
+      if (today >= ter && today <= qui) return 'active';
+      return 'next';
+    }
+
+    const weeks = [
+      {
+        num: 'Semana 1',
+        title: 'Exploração Inicial',
+        ter: '2026-04-15', qui: '2026-04-17',
+        terLabel: 'Terça · 15 Abr · 2h',
+        quiLabel: 'Quinta · 17 Abr · 1h',
+        terTasks: [
+          'Escolha da planta referência',
+          'Escolha do animal referência',
+          'Justificação escrita da escolha',
+          'Lista de materiais preliminar',
+        ],
+        quiTasks: [
+          'Esboços exploratórios (mín. 3)',
+          'Pesquisa de referências visuais',
+        ],
+        badge: null,
+      },
+      {
+        num: 'Semana 2',
+        title: 'Pesquisa & Definição',
+        ter: '2026-04-22', qui: '2026-04-24',
+        terLabel: 'Terça · 22 Abr · 2h',
+        quiLabel: 'Quinta · 24 Abr · 1h',
+        terTasks: [
+          'Pesquisa visual completa',
+          'Moodboard finalizado',
+          'Lista de materiais fechada',
+        ],
+        quiTasks: [
+          'Esboço final para aprovação',
+          'Apresentação à professora',
+        ],
+        badge: 'checkpoint',
+      },
+      {
+        num: 'Semana 3',
+        title: 'Construção Base',
+        ter: '2026-04-29', qui: '2026-05-01',
+        terLabel: 'Terça · 29 Abr · 2h',
+        quiLabel: 'Quinta · 1 Mai · 1h',
+        terTasks: [
+          'Estrutura base da obra',
+          'Testes de materiais',
+          'Definição do volume geral',
+        ],
+        quiTasks: [
+          'Ajustes à estrutura',
+          'Registo fotográfico fase 1',
+        ],
+        badge: null,
+      },
+      {
+        num: 'Semana 4',
+        title: 'Texturas & Pintura',
+        ter: '2026-05-06', qui: '2026-05-08',
+        terLabel: 'Terça · 6 Mai · 2h',
+        quiLabel: 'Quinta · 8 Mai · 1h',
+        terTasks: [
+          'Aplicação de texturas',
+          'Pintura de base',
+          'Ajustes de proporção',
+        ],
+        quiTasks: [
+          'Detalhes de textura',
+          'Registo fotográfico fase 2',
+        ],
+        badge: null,
+      },
+      {
+        num: 'Semana 5',
+        title: 'Acabamentos Finais',
+        ter: '2026-05-13', qui: '2026-05-15',
+        terLabel: 'Terça · 13 Mai · 2h',
+        quiLabel: 'Quinta · 15 Mai · 1h',
+        terTasks: [
+          'Pintura final',
+          'Detalhes finos',
+          'Correções gerais',
+        ],
+        quiTasks: [
+          'Última revisão da obra',
+          'Preparação para montagem',
+        ],
+        badge: null,
+      },
+      {
+        num: 'Semana 6',
+        title: 'Exposição',
+        ter: '2026-05-20', qui: '2026-05-22',
+        terLabel: 'Terça · 20 Mai · 2h',
+        quiLabel: 'Quinta · 22 Mai · 1h',
+        terTasks: [
+          'Montagem colectiva',
+          'Organização do espaço',
+          'Abertura da exposição',
+        ],
+        quiTasks: [
+          'Teste imersivo com visitantes',
+          'Registo fotográfico final',
+        ],
+        badge: 'expo',
+      },
+    ];
+
+    function buildTimeline() {
+      const container = document.getElementById('timelineWeeks');
+      weeks.forEach((w, idx) => {
+        const terDate = new Date(w.ter);
+        const quiDate = new Date(w.qui);
+        let status = weekStatus(w.ter, w.qui);
+        if (w.badge === 'expo') status = 'expo';
+
+        const item = document.createElement('div');
+        item.className = 'week-item';
+        item.style.transitionDelay = (idx * 0.08) + 's';
+
+        const dotClass = status;
+        const cardClass = status === 'expo' ? 'expo' : (status === 'done' ? 'done' : (status === 'active' ? 'active' : ''));
+
+        let badgeHTML = '';
+        if (w.badge === 'checkpoint') {
+          badgeHTML = '<span class="week-badge checkpoint">Checkpoint</span>';
+        } else if (w.badge === 'expo') {
+          badgeHTML = '<span class="week-badge expo-badge">Exposição</span>';
+        } else if (status === 'done') {
+          badgeHTML = '<span class="week-badge done-badge">Concluída</span>';
+        }
+
+        const buildTasks = (tasks) => tasks.map(t =>
+          `<li class="task-item"><span class="task-check"></span><span class="task-text">${t}</span></li>`
+        ).join('');
+
+        let checkpointBanner = '';
+        if (w.badge === 'checkpoint') {
+          checkpointBanner = `
+            <div class="checkpoint-banner">
+              <p>⚑ Checkpoint — Esboço final aprovado pela professora</p>
+            </div>`;
+        }
+
+        item.innerHTML = `
+          <div class="week-dot-col">
+            <div class="week-dot ${dotClass}"></div>
+          </div>
+          <div class="week-card ${cardClass}">
+            <div class="week-header">
+              <span class="week-num">${w.num}</span>
+              <span class="week-title">${w.title}</span>
+              ${badgeHTML}
+            </div>
+            <div class="wc-sessions">
+              <div class="session">
+                <div class="session-day">Terça · 2h</div>
+                <div class="session-date">${w.terLabel.split('·').slice(1).join('·').trim()}</div>
+                <ul class="task-list">${buildTasks(w.terTasks)}</ul>
+              </div>
+              <div class="session">
+                <div class="session-day">Quinta · 1h</div>
+                <div class="session-date">${w.quiLabel.split('·').slice(1).join('·').trim()}</div>
+                <ul class="task-list">${buildTasks(w.quiTasks)}</ul>
+              </div>
+            </div>
+            ${checkpointBanner}
+          </div>`;
+
+        container.appendChild(item);
+      });
+
+      // Task toggle
+      document.querySelectorAll('.task-item').forEach(ti => {
+        ti.addEventListener('click', () => ti.classList.toggle('done'));
+      });
+
+      // Cursor hover on tasks
+      attachCursorHover(document.querySelectorAll('.task-item, .week-card, a, button'));
+    }
+    buildTimeline();
+
+    // Decorative leaves in timeline bg
+    createFallingLeaves(document.getElementById('timelineLeaves'), 8);
+
+    // ─── INTERSECTION OBSERVERS ───────────────────────────
+
+    // Blur reveal for collage
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const delay = parseInt(entry.target.dataset.revealDelay || 0);
+          setTimeout(() => entry.target.classList.add('revealed'), delay);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.collage-cell').forEach((el, i) => {
+      el.dataset.revealDelay = i * 150;
+      revealObserver.observe(el);
+    });
+
+    // Objectivo bg reveal
+    const objBgObserver = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          document.getElementById('objectivoBg').classList.add('revealed');
+        }
+      });
+    }, { threshold: 0.2 });
+    const objSec = document.getElementById('objectivo');
+    if (objSec) objBgObserver.observe(objSec);
+
+    // Scroll reveal — general
+    const scrollObserver = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) e.target.classList.add('in-view');
+      });
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll('.reveal, .week-item, .obj-card, .rule-item, .entrega-card').forEach(el => {
+      scrollObserver.observe(el);
+    });
+
+    // Staggered delay for entrega-cards
+    document.querySelectorAll('.entrega-card').forEach((card, i) => {
+      card.style.transitionDelay = (i * 0.09) + 's';
+    });
+
+    // Staggered delay for obj-cards
+    document.querySelectorAll('.obj-card').forEach((card, i) => {
+      card.style.transitionDelay = (i * 0.12) + 's';
+    });
+
+    // ─── CURSOR HOVER ATTACH (on interactive elements) ────
+    // Called after timeline build above; also attach to links
+    attachCursorHover(document.querySelectorAll('.hero-cta, .entrega-btn'));
+  </script>
+</body>
+</html>
